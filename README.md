@@ -10,7 +10,7 @@ Please use GitHub to raise any issues and suggest any improvements.
 Via Composer
 
 ``` bash
-$ composer require-dev votemike/dbhelper
+$ composer require votemike/dbhelper --dev
 ```
 
 ## Usage
