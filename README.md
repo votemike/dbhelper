@@ -13,6 +13,8 @@ Via Composer
 $ composer require votemike/dbhelper --dev
 ```
 
+Then add `Votemike\Dbhelper\DbhelperServiceProvider::class` to your 'providers' array in config/app.php
+
 ## Usage
 
 Visit /dbhelper in your browser to see a list of suggested improvements
