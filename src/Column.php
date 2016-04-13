@@ -1,5 +1,7 @@
 <?php namespace Votemike\Dbhelper;
 
+use Exception;
+
 class Column
 {
     /**
@@ -20,6 +22,13 @@ class Column
      * @var
      */
     private $maxValue;
+    /**
+     * Min value that is currently in DB
+     * (Only useful for numeric columns)
+     *
+     * @var float|null
+     */
+    private $minValue = null;
     /**
      * @var
      */
@@ -46,26 +55,58 @@ class Column
     }
 
     /**
+     * @return bool
+     * @throws Exception
+     */
+    public function isSigned()
+    {
+        if (!$this->isNumeric()) {
+            throw new Exception('This method should only be called on numeric columns');
+        }
+
+        return !str_contains($this->type, 'unsigned');
+    }
+
+    /**
      * @param float $threshold % of max possible value that code should switch to larger datatype
      */
     public function populateWithSuggestedType($threshold = 0.75)
     {
         if ($this->isNumeric()) {
-            switch (true) {
-                case ($this->maxValue <= (DataType::tinyInt() * $threshold)):
-                    $this->suggestedType = 'tinyint';
-                    break;
-                case ($this->maxValue <= DataType::smallInt() * $threshold):
-                    $this->suggestedType = 'smallint';
-                    break;
-                case ($this->maxValue <= DataType::mediumInt() * $threshold):
-                    $this->suggestedType = 'mediumint';
-                    break;
-                case ($this->maxValue <= DataType::int() * $threshold):
-                    $this->suggestedType = 'int';
-                    break;
-                default:
-                    $this->suggestedType = 'bigint';
+            if ($this->minValue < 0) {
+                switch (true) {
+                    case ($this->maxValue <= (DataType::signedTinyInt() * $threshold)) && ($this->minValue >= -((DataType::signedTinyInt() - 1) * $threshold)):
+                        $this->suggestedType = 'tinyint';
+                        break;
+                    case ($this->maxValue <= DataType::signedSmallInt() * $threshold) && ($this->minValue >= -((DataType::signedSmallInt() - 1) * $threshold)):
+                        $this->suggestedType = 'smallint';
+                        break;
+                    case ($this->maxValue <= DataType::signedMediumInt() * $threshold) && ($this->minValue >= -((DataType::signedMediumInt() - 1) * $threshold)):
+                        $this->suggestedType = 'mediumint';
+                        break;
+                    case ($this->maxValue <= DataType::signedInt() * $threshold) && ($this->minValue >= -((DataType::signedInt() - 1) * $threshold)):
+                        $this->suggestedType = 'int';
+                        break;
+                    default:
+                        $this->suggestedType = 'bigint';
+                }
+            } else {
+                switch (true) {
+                    case ($this->maxValue <= (DataType::tinyInt() * $threshold)):
+                        $this->suggestedType = 'tinyint';
+                        break;
+                    case ($this->maxValue <= DataType::smallInt() * $threshold):
+                        $this->suggestedType = 'smallint';
+                        break;
+                    case ($this->maxValue <= DataType::mediumInt() * $threshold):
+                        $this->suggestedType = 'mediumint';
+                        break;
+                    case ($this->maxValue <= DataType::int() * $threshold):
+                        $this->suggestedType = 'int';
+                        break;
+                    default:
+                        $this->suggestedType = 'bigint';
+                }
             }
         }
         if ($this->isTextual()) {
@@ -114,6 +155,14 @@ class Column
     }
 
     /**
+     * @param float $value
+     */
+    public function setMinValue($value)
+    {
+        $this->minValue = $value;
+    }
+
+    /**
      * @return bool
      */
     public function shouldBeDisplayed()
@@ -125,6 +174,21 @@ class Column
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns true if the column should be unsigned and false if it should be signed
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function shouldBeUnsigned()
+    {
+        if (!$this->isNumeric()) {
+            throw new Exception('This method should only be called on numeric columns');
+        }
+
+        return $this->minValue >= 0;
     }
 
     /**

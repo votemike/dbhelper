@@ -67,6 +67,26 @@ class Table
     }
 
     /**
+     * Go through each column and find the lowest value of that field
+     */
+    public function populateNumericColumnsWithLongestValue()
+    {
+        $query = DB::table($this->name);
+        foreach ($this->columns as $column) {
+            if ($column->isNumeric()) {
+                $query->addSelect(DB::raw('MIN(`' . $column->name . '`) as `' . $column->name . '`'));
+            }
+        }
+        $result = $query->first();
+        foreach ($this->columns as $column) {
+            $columnName = $column->name;
+            if (isset($result->$columnName)) {
+                $column->setMinValue($result->$columnName);
+            }
+        }
+    }
+
+    /**
      * If no columns from the table need to be displayed, the table doesn't need to be displayed
      * @return bool
      */

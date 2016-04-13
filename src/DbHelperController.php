@@ -24,6 +24,7 @@ class DbHelperController extends Controller
             $tableCollection->addColumnToTable($result->TABLE_NAME, $result->COLUMN_NAME, $result->COLUMN_TYPE,
                 $result->DATA_TYPE);
         }
+        $tableCollection->populateTableNumericColumnsWithLowestValue();
         $tableCollection->populateTableColumnsWithLongestValue();
         $tableCollection->populateTableColumnsWithSuggestedType();
 

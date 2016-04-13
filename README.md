@@ -21,7 +21,8 @@ Visit /dbhelper in your browser to see a list of suggested improvements
 
 ## Future Improvements
 
-* Support signed integers
+* Refactor
+* Split Numeric and Textual Column types
 * Suggest missing indexes/foreign keys
 
 ## Credits

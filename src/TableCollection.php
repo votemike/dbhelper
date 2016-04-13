@@ -43,6 +43,13 @@ class TableCollection
         }
     }
 
+    public function populateTableNumericColumnsWithLowestValue()
+    {
+        foreach ($this->tables as $table) {
+            $table->populateNumericColumnsWithLongestValue();
+        }
+    }
+
     public function populateTableColumnsWithSuggestedType()
     {
         foreach ($this->tables as $table) {
